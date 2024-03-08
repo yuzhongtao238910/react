@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <script>
+    function initialUpdateQueue(fiber) {
+      const queue = {
+        shared: {
+          pending: null
+        }
+      }
+      fiber.updateQueue = queue
+    }
+    function createUpdate() {
+        return {}
+    }
+    function enqueueUpdate(fiber, update) {
+        const updateQueue = fiber.updateQueue
+        const shared = updateQueue.shared
+        const pending = shared.pending
+        if (pending == null) {
+            update.next = update
+        } else {
+            // 如果更新队列不为空的话，取出第一个更新，
+            update.next = pending.next
+            // 然后让原来队列的尾部 最后一个 的 next指向新的next
+            // console.log(fiber, pending, update , '30----')
+            // debugger
+            console.log(update)
+            debugger
+            pending.next = null
+            // console.log(pending)
+            pending.next = update
+            // console.log(pending, '32----')
+            // console.log(fiber, 31)
+        }
+        updateQueue.shared.pending = update
+    }
+    function processUpdateQueue(fiber) {
+        const queue = fiber.updateQueue
+        const pending = queue.shared.pending
+        console.log(pending)
+        // debugger
+        if (pending !== null) {
+            queue.shared.pending = null
+            // 最后的一个更新
+            const lastPendingUpdate = pending
+            const firstPendingUpdate = lastPendingUpdate.next
+
+            // 将环状剪开
+            // 1 2 3 4
+            lastPendingUpdate.next = null
+
+            let newState = fiber.memoizedState
+            let update = firstPendingUpdate
+            while(update) {
+                newState = getStateFromUpdate(update, newState)
+                update = update.next
+            }
+            fiber.memoizedState = newState
+        }
+    }
+    function getStateFromUpdate(update, newState) {
+        return Object.assign({}, newState, update.payload)
+    }
+    let fiber = {
+        memoizedState: { id: 1}
+    }
+
+    initialUpdateQueue(fiber)
+
+    // console.log(fiber)
+    // debugger
+
+    let update1 = createUpdate()
+
+    update1.payload = { app: '1111' }
+
+    let update2 = createUpdate()
+
+    update2.payload = { name: '2222' }
+
+    let update3 = createUpdate()
+
+    update3.payload = { water: '3333' }
+
+    let update4 = createUpdate()
+
+    update4.payload = { water: '4444' }
+
+    // debugger
+    enqueueUpdate(fiber, update1)
+
+    debugger
+
+    enqueueUpdate(fiber, update2)
+
+    console.log(fiber)
+    // debugger
+
+    debugger
+    enqueueUpdate(fiber, update3)
+
+    enqueueUpdate(fiber, update4)
+    console.log(fiber)
+    debugger
+
+    console.log(fiber)
+
+
+    // 1
+    // 4 1 2 3 4
+
+    // 3 1 2 3
+
+    // 2 1 2
+    /**
+        {
+            memoizedState: { id: 1},
+            updateQueue: {
+                shared: {
+                    pending: {
+                        payload: {
+                            water: '1111',
+                            next: update1
+                        }
+                    }
+                }
+            }
+        }
+
+
+        {
+            memoizedState: { id: 1},
+            updateQueue: {
+                shared: {
+                    pending: {
+                        payload: {
+                            water: '1111',
+                        },
+                        next: {
+                            payload: {
+                                water: '2222',
+                            },
+                            next: update1
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        update2.next = update1
+
+
+        update3.next = update2
+
+
+
+    
+
+        update2.next = update1
+
+        update1.next = 
+
+        {
+            payload: {
+                water: '2222',
+            },
+            next: update1
+        }
+    
+
+
+        n1.next = n1
+
+
+        n2.next = n1
+
+        n1.next = n2
+    
+        pending = n2
+
+        n3.next = n1
+
+        n2.next = n3
+
+
+
+
+        n2.next = n1
+
+        n1.next = null
+
+        n1.next = n2
+    
+
+        pending = n2
+
+
+        n3.next = n1
+
+        n1.next = n2
+
+        n2.next = n3
+
+        n3.next = n1
+
+
+
+        n4.next = n1
+
+        n3.next = n4
+
+
+     */ 
+
+    // 基于老状态，计算新状态
+    processUpdateQueue(fiber)
+    console.log(fiber.memoizedState)
+
+  </script>
+</body>
+</html>
+
+
+

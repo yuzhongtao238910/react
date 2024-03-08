@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        /*
+        我们有虚拟dom
+        1- 以前是直接将虚拟dom渲染成为真实dom，一气呵成的 如果中断的话，就无法回到原来的节点继续执行
+        2- 把除children以外的属性拷贝到真实dom上面
+        3- 把此虚拟dom的子节点，也渲染到父节点的真实dom上面
+
+
+        // react18之后
+            1- 把虚拟dom构建成为fiber树
+            2-
+         */
+        /*
+        const element = (
+            <div id="a1">
+                <div id="b1">
+                    <div id="c1"></div>
+                    <div id="c2"></div>
+                </div>
+                <div id="b2"></div>
+            </div>
+        )
+        */
+        const vdom = {
+            type: 'div',
+            key: 'A1',
+            props: {
+                id: 'a1',
+                children: [
+                    {
+                        type: 'div',
+                        key: 'b1',
+                        props: {
+                            id: 'b1',
+                            children: [
+                                {
+                                    type: 'div',
+                                    key: 'c1',
+                                    props: {
+                                        id: 'c1'
+                                    }
+                                },
+                                {
+                                    type: 'div',
+                                    key: 'c2',
+                                    props: {
+                                        id: 'c2'
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        type: 'div',
+                        key: 'b2',
+                        props: {
+                            id: 'b2'
+                        }
+                    }
+                ]
+            }
+        }
+        function render(vdom, container) {
+            const dom = document.createElement(vdom.type)
+            Object.keys(vdom.props).filter(key => key !== 'children').forEach(key => {
+                dom[key] = vdom.props[key]
+            })
+
+            if (Array.isArray(vdom.props.children)) {
+                vdom.props.children.forEach(child => render(child, dom))
+            }
+            container.appendChild(dom)
+        }
+        render(vdom, document.getElementById('root'))
+    </script>
+</body>
+</html>

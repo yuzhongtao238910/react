@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        /*
+        在react进行dom diff的时候，会计算需要执行的操作
+
+        按位 & 与
+        按为 | 或
+         */
+        const Placement = 0b001 // 1
+        const Update = 0b010 // 2
+        let flags = 0b00 // 0
+
+        // 增加操作
+
+        flags |= Placement
+        flags |= Update
+        console.log(flags)
+
+        // 0b011  &  0b110
+        flags = flags & (~Placement)
+        console.log(flags) // 0b010
+
+        // 判断是否包含
+        console.log((flags & Placement) == Placement)
+        console.log((flags & Update) == Update)
+    </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    /*
+    先执行当前的fiber
+    有大儿子执行大儿子
+    没有大儿子执行弟弟
+    如果没有弟弟找叔叔
+     */
+    let a1 = { type: 'div', props: {id: "a1"}}
+    let b1 = { type: 'div', props: {id: "b1"}, return: a1}
+    let b2 = { type: 'div', props: {id: "b2"}, return: a1}
+    let c1 = { type: 'div', props: {id: "c1"}, return: b1}
+    let c2 = { type: 'div', props: {id: "c2"}, return: b1}
+
+    a1.child = b1
+    b2.sibling = b2
+    b1.child = c1
+    c1.sibling = c2
+    let nextUnitOfWork = null
+    const hasTimeRemaining = () => {
+      return true // 模拟的
+    }
+    function workLoop() {
+      // 工作循环每一个处理一个fiber，处理完后可以暂停
+      // 如果有下一个任务
+      while (nextUnitOfWork && hasTimeRemaining()) {
+        nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
+      }
+      console.log("render阶段结束了")
+    }
+    // 有两种情况完成一个fiber
+    // 1- 没有child，没有大儿子
+    // 2- 所有的儿子处理完后，父fiber也会完成
+    //
+
+    // 执行一个工作单元
+    function performUnitOfWork(fiber) {
+      let child = beginWork(fiber) // 执行当前的fiber，并且返回下一个fiber
+      if (child) {
+        return child
+      }
+      while (fiber) {
+        completeUnitOfWork(fiber) // 可以结束此fiber的渲染了
+        if (fiber.sibling) {
+          return fiber.sibling
+        }
+        fiber = fiber.return
+      }
+    }
+    function beginWork(fiber) {
+      console.log("beginWork", fiber.props.id)
+      return fiber.child
+    }
+    function completeUnitOfWork(fiber) {
+      console.log("completeUnitOfWork", fiber.props.id)
+    }
+    nextUnitOfWork = a1
+    workLoop()
+  </script>
+</body>
+</html>

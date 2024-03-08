@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<script type="text/javascript">
+		const a1 = {type: 'div', props: {id: 'a1'}}
+		const b1 = {type: 'div', props: {id: 'b1'}, return: a1}
+		const b2 = {type: 'div', props: {id: 'b2'}, return: a1}
+		const c1 = {type: 'div', props: {id: 'c1'}, return: b1}
+		const c2 = {type: 'div', props: {id: 'c2'}, return: b1}
+
+		a1.child = b1
+		b1.sibling = b2
+		b1.child = c1
+		c1.sibling = c2
+
+
+		// 下一个工作单元
+		let nextUnitOfWork = null
+
+		function workLoop() {
+			while(nextUnitOfWork) {
+				// 执行一个任务 并且返回i下一个任务
+				nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
+			}
+			console.log('render阶段结束')
+		}
+		function performUnitOfWork(fiber) {
+			let child = beginWork(fiber)
+			// 执行完a1之后，会返回a1的第一个子节点
+			if (child) {
+				return child
+			}
+			// 如果没有子节点
+
+			while(fiber) {
+				completeUnitOfWork(fiber)
+				if (fiber.sibling) {
+					return fiber.sibling
+				}
+				fiber = fiber.return
+			}
+		}
+
+		function beginWork(fiber) {
+			console.log('beginwork', fiber.props.id)
+			return fiber.child
+		}
+			
+		function completeUnitOfWork(fiber) {
+			console.log('completeUnitOfWork', fiber.props.id)
+		}
+
+		nextUnitOfWork = a1
+
+		workLoop()
+	</script>
+</body>
+</html>

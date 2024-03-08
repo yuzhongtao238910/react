@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>requestIdleCallback</title>
+</head>
+<body>
+    <script>
+        /*
+        react 里面并没有使用这个方法，里面是规定的5ms
+            requestIdleCallback
+                1- 兼容性问题
+                2- 执行的时间不可控
+        单个任务时间过长，会被中断吗？一个任务就是执行的最小单位，不能打断啊
+            最小单位就是一个任务，是不能被中断的
+        这种调度方式称为合作式调度，是用户和浏览器双方的合作
+         */
+        function sleep(duration) {
+            for (let t = Date.now(); Date.now() - t <= duration;) {}
+        }
+        const works = [
+            () => {
+                console.log("第一个任务开始")
+                sleep(200)
+                console.log("第一个任务结束")
+            },
+            () => {
+                console.log("第二个任务开始")
+                sleep(30)
+                console.log("第二个任务结束")
+            },
+            () => {
+                console.log("第三个任务开始")
+                sleep(30)
+                console.log("第三个任务结束")
+            }
+        ]
+
+        requestIdleCallback(workLoop)
+        function workLoop(deadline) {
+            // 因为一帧是16.6ms，浏览器执行完高优先级任务后，如果还有时间，会执行workLoop的方法
+            // 获取deadline.timeRemaining() 此帧的剩余的时间
+            console.log(deadline, "本帧的剩余时间是：", deadline.timeRemaining())
+            while (deadline.timeRemaining() > 1 && works.length > 0) {
+                performUnitOfWork()
+            }
+            // 如果没有剩余时间了，就会跳出循环,如果还有剩余任务的话
+            if (works.length > 0) {
+                console.log(`只剩下${deadline.timeRemaining()}`, '时间不够了，等待浏览器下一次空闲的时候执行')
+                requestIdleCallback(workLoop)
+            }
+        }
+        function performUnitOfWork() {
+            const work = works.shift() // 取出任务数组之中的第一个任务
+            work()
+        }
+    </script>
+</body>
+</html>

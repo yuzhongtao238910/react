@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<script type="text/javascript">
+		class MyPromise {
+			constructor(executor) {
+				this.state = 'pending'
+				this.value = null
+				this.error = null
+		
+				this.onResolvedList = []
+				this.onRejectedList = []
+				const resolve = (val) => {
+					if (this.state === 'pending') {
+						this.value = val
+						this.state = 'fulfilled'
+						if (this.onResolvedList.length > 0) {
+							this.onResolvedList.forEach(item => item())
+						}
+					}
+				}
+				const reject = (err) => {
+					if (this.state === 'pending') {
+						this.error = error
+						this.state = 'rejected'
+						if (this.onRejectedList.length > 0) {
+							this.onRejectedList.forEach(item => item())
+						}
+					}
+				}
+	
+				executor(resolve, reject)
+			}
+			
+			then(onFulfilled, onRejected) {
+				const innerPromise = new MyPromise((resolve, reject) => {
+					if (this.state === 'fulfilled') {
+						const res = onFulfilled(this.value)
+						resolve(res)
+					}
+			
+					if (this.state === 'rejected') {
+						onRejected(this.error)
+					}
+			
+					if (this.state === 'pending') {
+						this.onResolvedList.push(() => {
+							onFulfilled(this.value)
+						})
+						this.onRejectedList.push(() => {
+							onRejected(this.error)
+						})
+					}
+				})
+				return innerPromise
+			}
+		}
+		const ppp = new MyPromise((resolve, reject) => {
+			resolve(9999)
+		})
+
+
+		ppp.then(res => {
+			// console.log(res, 1)
+			return 23
+		}).then(rr => {
+			// console.log(rr, 2)
+		})
+
+
+		/**
+		 *
+		 */
+
+		// function request(url, maxCount) {
+		// 	return fetch(url).catch(err => maxCount <= 0 ? Promise.reject(err) : request(url, maxCount - 1))
+		// }  
+
+
+		// function request(url, timer) {
+		// 	fetch(url)
+		// }
+
+
+		// console.log('--------------')
+
+		// const pp1 = new Promise((resolve, reject) => {
+		// 	// resolve(88)
+		// 	reject(888)
+		// })
+
+
+		// function aa(url) {
+		// 	const pp = fetch(url).then(res => {
+		// 		// resolve(res)
+		// 		return res.json()
+		// 	})
+		// 	console.log(pp)
+		// 	return new Promise((resolve, reject) => {
+		// 		pp.then(res => {
+		// 			console.log(res, 106)
+		// 			resolve(res)
+		// 			setTimeout(() => {
+		// 				reject(err)
+		// 			}, 3000)
+		// 		}, err => {
+		// 			setTimeout(() => {
+		// 				reject(err)
+		// 			}, 3000)
+		// 		})
+		// 	})
+		// }
+
+		// const yy = aa('http://127.0.0.1:9999/apple')
+
+		// aa('http://127.0.0.1:9999/apple').then((res) => {
+		// 	console.log(res, 113)
+		// }, err => {
+		// 	console.log(err, 120)
+		// })
+		// fetch('http://127.0.0.1:9999/a1pple').then((response) => {
+		// 	return response.json()
+		// }).then((res) => {
+		// 	console.log(res, 113)
+		// }).catch(err => {
+		// 	console.log(err, 109)
+		// })
+
+		// yy.then((res) => {
+		// 	console.log(res, '100')
+		// }, (err) => {
+		// 	console.log(err, '102')
+		// })
+
+		// const pp2 = pp1.catch(err => {
+		// 	console.log(err, 1)
+		// 	// return 123
+		// 	// return new Error('222')
+		// })
+
+		// pp2.catch(rr => {
+		// 	console.log(rr, 99)
+		// })
+
+		// console.log(pp2)
+
+		// pp2.then(rr => {
+		// 	console.log(rr, 98)
+		// })
+		// const pp3 = pp1.then((res) => {
+		// 	console.log(res)
+		// }, (err => {
+		// 	console.log(err, 2)
+		// }))
+		// console.log(pp1, pp2, pp3, pp2 === pp3, pp2[['PromiseState']])
+
+
+
+
+
+
+
+	function aa(url, timeout = 3000) {  
+		// 返回一个新的Promise  
+		return new Promise((resolve, reject) => {  
+		    // 设置一个定时器，用于超时处理  
+		    const timer = setTimeout(() => {  
+		        reject(new Error('Request timed out after ' + timeout + 'ms.'));  
+		    }, timeout);  
+	
+		    // 发起fetch请求  
+		    fetch(url)  
+		        .then(res => {  
+		            // 清除超时定时器  
+		            clearTimeout(timer);  
+		              
+		            // 检查响应是否成功  
+		            if (!res.ok) {  
+		                throw new Error('Network response was not ok.');  
+		            }  
+		              
+		            // 解析响应为JSON  
+		            return res.json();  
+		        })  
+		        .then(res => {  
+		            // 请求成功，解析完成，返回结果  
+		            resolve(res);  
+		        })  
+		        .catch(err => {  
+		            // 请求失败，拒绝Promise  
+		            reject(err);  
+		        });  
+		});  
+	}  
+
+
+	function bb(url, maxCount) {
+		return new Promise((resolve, reject) => {
+			fetch(url).then(res => res.json())
+				.then(res => {
+					resolve(res)
+				})
+				.catch(err => {
+					maxCount == 0 ? reject(err) : bb(url, maxCount - 1).then(res => {resolve(res)}).catch(err => { reject(err) })
+				})
+		})
+	}
+
+
+	function cc(url, timer) {
+		return new Promise((resolve, reject) => {
+			let timerId = setTimeout(() => {
+				reject('超时')
+			}, timer)
+			fetch(url)
+				.then(res => res.json())
+				.then(res => {
+					clearTimeout(timerId)
+					resolve(res)
+				})
+				.catch(err => {
+					clearTimeout(timerId)
+					reject(err)
+				})
+		})
+	}
+
+cc('http://127.0.0.1:9999/apple1', 500)
+	.then(res => {
+		console.log(res, 235)
+	}) 
+	.catch(err => {
+		console.log(err, 238)
+	})
+
+
+  
+// 使用函数发送请求，并在5秒后超时  
+// aa('http://127.0.0.1:9999/apple')  
+//     .then((res) => {  
+//         // console.log(res, 113);  
+//     })  
+//     .catch(err => {  
+//         // console.log(err, 120);  
+//     });
+
+    // bb('http://127.0.0.1:9999/appl1e', 3)  
+    // .then((res) => {  
+    //     console.log(res, 223);  
+    // })  
+    // .catch(err => {  
+    //     console.log(err, 226);  
+    // });
+	</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<script type="text/javascript">
+		// 手写 请求 -》 模拟 超时时间
+
+		function overTime(url, time) {
+			return new Promise((resolve, reject) => {
+				let timerId = setTimeout(() => {
+					reject('请求超时')
+				}, time)
+
+				fetch(url).then(res => res.json())
+				.then(res => {
+					clearTimeout(timerId)
+					resolve(res)
+				})
+				.catch(err => {
+					clearTimeout(timerId)
+					reject(err)
+				})
+			})
+		}
+
+
+		// 手写 可以重复请求5次，若5次均失败就彻底返回失败
+		function maxReq(url, maxCount) {
+			return new Promise((resolve, reject) => {
+				fetch(url)
+					.then(res => res.json())
+					.then(res => {
+						resolve(res)
+					})
+					.catch(err => {
+						maxCount <= 0 ? reject(err) : maxReq(url, maxCount - 1).then(res => resolve(res)).catch(err => reject(err))
+					})
+			})
+		}
+
+		// 正确的请求url是：http://127.0.0.1:9999/apple，返回结果的时间是：3000
+		/*
+		后台的代码
+			const express = require("express")
+			const cors = require("cors")
+			const app = express()
+			
+			app.use(cors())
+			app.get("/apple", (req, res) => {
+				setTimeout(() => {
+					res.json({
+						name: 'apple',
+						age: 11
+					})
+				}, 3000)
+				
+			})
+			
+			app.listen(9999, () => {
+				console.log("success")
+			})
+		*/
+
+		overTime('http://127.0.0.1:9999/apple1', 500)
+			.then(res => {
+				console.log(res, 48)
+			})
+			.catch(err => {
+				console.log(err, 51)
+			})
+		overTime('http://127.0.0.1:9999/apple', 500)
+			.then(res => {
+				console.log(res, 55)
+			})
+			.catch(err => {
+				console.log(err, 58)
+			})
+
+
+		maxReq('http://127.0.0.1:9999/apple1', 4)
+			.then(res => {
+				console.log(res, 64)
+			})
+			.catch(err => {
+				console.log(err, 67)
+			})
+	</script>
+</body>
+</html>
