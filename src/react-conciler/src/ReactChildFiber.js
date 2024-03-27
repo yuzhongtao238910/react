@@ -15,8 +15,9 @@
  * @param shouldTrackSideEffects 是否跟踪副作用，是否需要比较
  */
 import { REACT_ELEMENT_TYPE } from "../../shared/ReactSymbols.js"
-import { createFiberFromElement } from "./ReactFiber.js"
+import { createFiberFromElement, createFiberFromText } from "./ReactFiber.js"
 import { Placement } from "./ReactFiberFlags.js"
+import isArray  from "../../shared/isArray.js"
 
 
 function createChildReconciler(shouldTrackSideEffects) {
@@ -45,6 +46,62 @@ function createChildReconciler(shouldTrackSideEffects) {
         return newFiber
     }
 
+    function createChild(returnFiber, newChild) {
+        if ((typeof newChild === 'string' && newChild !== '') || typeof newChild === 'number') {
+            const created = createFiberFromText(`${newChild}`)
+            created.return = returnFiber
+            return created
+        }
+
+
+        if (typeof newChild === 'object' && newChild !== null) {
+             switch (newChild) {
+                 case REACT_ELEMENT_TYPE:
+                     const created = createFiberFromElement(`${newChild}`)
+                     created.return = returnFiber
+                     return created;
+             }
+        }
+
+        return null
+    }
+
+
+    function placeChild(newFiber, newIndex) {
+        newFiber.index = newIndex
+        if (shouldTrackSideEffects) {
+            // 如果一个fiber它的flags有placement，说明此节点徐要创建真实dom并且插入到父容器之中
+            // 如果父fiber节点是初次挂载，那么shouldTrackSideEffects变量是false，不需要添加flags
+            // 那么会在完成阶段把所有的子节点全部添加到自己身上
+            newFiber.flags |= Placement
+        }
+    }
+
+    function reconcileChildrenArray(returnFiber, currentFirstFiber, newChildren) {
+        console.log(returnFiber, currentFirstFiber, newChildren)
+        let resultinfFirstChild = null // 返回的第一个新的儿子
+        let previousNewFiber = null // 上一个新的fiber
+        let newIndex = 0
+        for (;newIndex < newChildren.length;newIndex++) {
+            const newFiber = createChild(returnFiber, newChildren[newIndex])
+            if (newFiber === null) {
+                continue
+            }
+            placeChild(newFiber, newIndex)
+
+            // 如果 previousNewFiber 为null，说明是第一个fiber
+            if (previousNewFiber === null) {
+                resultinfFirstChild = newFiber // 这个newFiber就是大儿子
+            } else { // 说明不是大儿子，就把newFiber添加到上一个子节点的后面
+                previousNewFiber.sibling = newFiber
+            }
+            // 让newFiber成为最后一个或者 上一个 子fiber
+            previousNewFiber = newFiber
+        }
+        // 返回第一个子fiber
+        return resultinfFirstChild
+    }
+
     /**
      * 比较子fibers
      * 所谓的dom-diff就写在这个里面
@@ -64,6 +121,14 @@ function createChildReconciler(shouldTrackSideEffects) {
                     break
             }
         }
+
+        // newChild: ['hello', span虚拟dom元素]
+
+        if (isArray(newChild)) {
+            return reconcileChildrenArray(returnFiber, currentFirstFiber, newChild)
+        }
+
+        return null
 
     }
 

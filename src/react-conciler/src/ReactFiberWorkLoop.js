@@ -33,6 +33,7 @@ function prepareFreshStack(root) {
 function renderRootSync(root) {
 	// 开始构建fiber树
 	prepareFreshStack(root)
+	// debugger
 	workLoopSync()
 }
 
@@ -41,13 +42,19 @@ function workLoopSync() {
 		performUnitOfWork(workInProgress)
 	}
 }
+
+/**
+ * 执行一个工作单元
+ * @param unitOfWork
+ */
 function performUnitOfWork(unitOfWork) {
 	// 获取新的fiber对应的老的fiber
 	const current = unitOfWork.alternate
-	console.log(unitOfWork, 47)
+	// console.log(unitOfWork, 47)
 	// 完成当前fiber的子fiber链表构建后
 	const next = beginWork(current, unitOfWork)
 	unitOfWork.memoizedProps = unitOfWork.pendingProps
+	// debugger
 	if (next === null) {
 		// 如果没有子节点，表示当前的fiber已经完成了
 		// completeUnitWork(unitOfWork)

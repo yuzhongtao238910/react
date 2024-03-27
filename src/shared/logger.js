@@ -5,7 +5,7 @@ const ReactWorkTagsMap = new Map()
 for (let tag in ReactWorkTags) {
     ReactWorkTagsMap.set(ReactWorkTags[tag], tag)
 }
-console.log(ReactWorkTagsMap)
+// console.log(ReactWorkTagsMap)
 export default function (prefix, workInProgress) {
     let tagValue = workInProgress.tag
     let tagName = ReactWorkTagsMap.get(tagValue)

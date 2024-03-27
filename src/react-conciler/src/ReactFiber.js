@@ -1,4 +1,4 @@
-import {HostComponent, HostRoot, IndeterminateComponent} from "./ReactWorkTags.js"
+import {HostComponent, HostRoot, HostText, IndeterminateComponent} from "./ReactWorkTags.js"
 import { NoFlags } from "./ReactFiberFlags.js"
 
 /**
@@ -40,6 +40,8 @@ export function FiberNode(tag, pendingProps, key) {
     // 替身 轮替 一个fiber节点只有两个版本，一个老的，一个新的，来回实现替换
     // 在后面讲到dom diff的时候会用到
     this.alternate = null // 替身 更替 的意思
+
+    this.index = 0
 }
 /*
 we use a double buffering pooling technique because we know that ww'll only
@@ -91,7 +93,8 @@ export function createWorkInProgress(current, pendingProps) {
  * @param element
  */
 export function createFiberFromElement(element) {
-    const { type, key, pendingProps } = element
+    const { type, key } = element
+    const pendingProps = element.props
     return createFiberFromTypeAndProps(type, key, pendingProps)
 }
 function createFiberFromTypeAndProps(type, key, pendingProps) {
@@ -108,7 +111,10 @@ function createFiberFromTypeAndProps(type, key, pendingProps) {
 
 
 
-
+export function createFiberFromText(content) {
+    const fiber = createFiber(HostText, content, null)
+    return fiber
+}
 
 
 
