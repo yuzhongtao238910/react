@@ -20,7 +20,7 @@
     let c2 = { type: 'div', props: {id: "c2"}, return: b1}
 
     a1.child = b1
-    b2.sibling = b2
+    b1.sibling = b2
     b1.child = c1
     c1.sibling = c2
     let nextUnitOfWork = null
@@ -46,6 +46,7 @@
       if (child) {
         return child
       }
+      // 如果下一个fiber是null，就结束了
       while (fiber) {
         completeUnitOfWork(fiber) // 可以结束此fiber的渲染了
         if (fiber.sibling) {
@@ -63,6 +64,13 @@
     }
     nextUnitOfWork = a1
     workLoop()
+
+    // 1- 虚拟dom的渲染
+    // 2- 函数组件
+    // 3- useReducer useState
+    // 4- dom-diff
+    // 5- 任务调度
+    // 6- 优先级别 lane模型 并发渲染
   </script>
 </body>
 </html>

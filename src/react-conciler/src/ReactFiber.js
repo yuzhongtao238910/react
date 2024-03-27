@@ -1,4 +1,4 @@
-import { HostRoot } from "./ReactWorkTags.js"
+import {HostComponent, HostRoot, IndeterminateComponent} from "./ReactWorkTags.js"
 import { NoFlags } from "./ReactFiberFlags.js"
 
 /**
@@ -50,3 +50,83 @@ export function createFiber(tag, pendingProps, key) {
 export function createHostRootFiber() {
     return createFiber(HostRoot, null, null)
 }
+
+
+/**
+ * 基本老的fiber和新的属性来创建新的fiber
+ * @param current 老fiber
+ * @param pendingProps 新属性
+ */
+export function createWorkInProgress(current, pendingProps) {
+    // 拿到老的fiber的轮替
+    let workInProgress = current.alternate
+
+    if (!workInProgress) {
+        // 没有，说明是创建的过程
+        workInProgress = createFiber(current.tag, pendingProps, current.key)
+        workInProgress.type = current.type
+        workInProgress.stateNode = current.stateNode
+        workInProgress.alternate = current
+        current.alternate = workInProgress
+    } else {
+        // 有，说明是更新的过程
+        workInProgress.pendingProps = pendingProps
+        workInProgress.type = current.type
+        workInProgress.flags = NoFlags
+        workInProgress.subtreeFlags = NoFlags
+    }
+    workInProgress.child = current.child
+    workInProgress.memoizedProps = current.memoizedProps
+    workInProgress.memoizedState = current.memoizedState
+    workInProgress.updateQueue = current.updateQueue
+    workInProgress.sibling = current.sibling
+    workInProgress.index = current.index
+
+    return workInProgress
+}
+
+
+/**
+ * 根据虚拟dom节点创建fiber节点
+ * @param element
+ */
+export function createFiberFromElement(element) {
+    const { type, key, pendingProps } = element
+    return createFiberFromTypeAndProps(type, key, pendingProps)
+}
+function createFiberFromTypeAndProps(type, key, pendingProps) {
+    let tag  = IndeterminateComponent // 先给一个默认值
+    if (typeof type === 'string') {
+        // 如果是一个字符串的话，说明此fiber类型是一个原生组件 div span，除此之外都是上面的
+        tag = HostComponent
+    }
+    const fiber = createFiber(tag, pendingProps, key)
+    fiber.type = type
+    return fiber
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

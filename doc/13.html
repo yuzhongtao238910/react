@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+	<script type="text/javascript">
+		const root = {
+			name: 'a1',
+			children: [
+				{
+					name: 'b',
+					children: [
+						{
+							name: 'b1'
+						},
+						{
+							name: 'b2'
+						}
+					]
+				},
+				{
+					name: 'c',
+					children: [
+						{
+							name: 'c1'
+						},
+						{
+							name: 'c2'
+						}
+					]
+				}
+			]
+		}
+
+		// 深度遍历
+		function dfs(node) {
+			console.log(node.name)
+			node.children?.forEach(dfs)
+		}
+		dfs(root)
+
+		// dfs 广度优先
+		function bfs(node) {
+			const stack = []
+			stack.push(node)
+			let current = null
+			while (current = stack.shift()) {
+				console.log(current.name)
+				current.children?.forEach(child => {
+					stack.push(child)
+				})
+			}
+		}
+		// debugger
+		console.log("---------------")
+		bfs(root)
+	</script>
+</body>
+</html>
