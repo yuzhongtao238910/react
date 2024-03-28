@@ -10,11 +10,33 @@ export default function (prefix, workInProgress) {
     let tagValue = workInProgress.tag
     let tagName = ReactWorkTagsMap.get(tagValue)
     let str = `${tagName}`
+    // console.log(workInProgress)
     if (tagName === 'HostComponent') {
-        str += `${workInProgress.type}`
+
+        str += `-${workInProgress.type}`
     } else if (tagName === 'HostText') {
-        str += `${workInProgress.pendingProps}`
+        str += `-${workInProgress.pendingProps}`
     }
-    console.log(`${prefix} -- ${str}`)
-    return str
+    // console.log(`${prefix} -- ${str}`)
+    // return str
 }
+
+
+let indent = {number: 0}
+
+
+
+export {indent}
+
+
+
+
+
+
+
+
+
+
+
+
+

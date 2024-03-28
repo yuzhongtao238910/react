@@ -80,9 +80,9 @@ react16之前：
  */
 import { createRoot } from "react-dom/client.js";
 let element1 = (
-	<h1>
-		hello <span style={{color: 'red'}}>world</span>
-	</h1>
+		<h1 id="container">
+			hello1 <span style={{color: 'red'}}>world1</span>
+		</h1>
 )
 // console.log(element1)
 
@@ -100,7 +100,7 @@ RootFiber 表示的是 Fiber树的根节点
 
 
 const root = createRoot(document.querySelector("#root"))
-console.log(root)
+// console.log(root)/**/
 
 // 把element虚拟dom渲染到容器之中
 root.render(element1)

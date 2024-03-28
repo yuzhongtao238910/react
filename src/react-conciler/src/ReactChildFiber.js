@@ -55,9 +55,10 @@ function createChildReconciler(shouldTrackSideEffects) {
 
 
         if (typeof newChild === 'object' && newChild !== null) {
-             switch (newChild) {
+             // debugger
+             switch (newChild.$$typeof) {
                  case REACT_ELEMENT_TYPE:
-                     const created = createFiberFromElement(`${newChild}`)
+                     const created = createFiberFromElement(newChild)
                      created.return = returnFiber
                      return created;
              }
@@ -78,7 +79,10 @@ function createChildReconciler(shouldTrackSideEffects) {
     }
 
     function reconcileChildrenArray(returnFiber, currentFirstFiber, newChildren) {
-        console.log(returnFiber, currentFirstFiber, newChildren)
+        // console.log(returnFiber, currentFirstFiber, newChildren)
+
+        // console.log(newChildren)
+        // debugger
         let resultinfFirstChild = null // 返回的第一个新的儿子
         let previousNewFiber = null // 上一个新的fiber
         let newIndex = 0
@@ -111,7 +115,7 @@ function createChildReconciler(shouldTrackSideEffects) {
      * @param newChild 新的子虚拟dom
      */
     function  reconcileChildFibers(returnFiber, currentFirstFiber, newChild) {
-        console.log(returnFiber, currentFirstFiber, newChild)
+        // console.log(returnFiber, currentFirstFiber, newChild)
         // 现在暂时只考虑新的节点只有一个的情况
         if (typeof  newChild === 'object' && newChild !== null) {
             switch (newChild.$$typeof) {

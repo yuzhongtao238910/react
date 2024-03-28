@@ -77,7 +77,7 @@ export function processUpdateQueue(workInProgress) {
             newState = getStateFromUpdate(update, newState)
             update = update.next
         }
-        console.log(newState)
+        // console.log(newState)
         // 把最终计算到的状态赋值给 memoizedState
         workInProgress.memoizedState = newState
     }
@@ -89,7 +89,7 @@ export function processUpdateQueue(workInProgress) {
  * @param prevState
  */
 function getStateFromUpdate(update, prevState) {
-    console.log(prevState, update, 92)
+    // console.log(prevState, update, 92)
     switch (update.tag) {
         // 一个新的fiber的memoizedState就是null
         // 此处合并的不是vdom，而是一个对象，对象里面的属性的值是vdom
